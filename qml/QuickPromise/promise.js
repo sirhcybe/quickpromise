@@ -71,20 +71,20 @@ function QPromise(executor) {
     }
 }
 
-function instanceOfPromiseJS(object) {
+function instanceOfQPromiseJS(object) {
     return typeof object === "object" &&
            typeof object.hasOwnProperty === "function" &&
             object.hasOwnProperty("___promiseSignature___");
 }
 
-function instanceOfPromiseItem(object) {
+function instanceOfQPromiseItem(object) {
     return typeof object === "object" &&
            typeof object.hasOwnProperty === "function" &&
             object.hasOwnProperty("___promiseQmlSignature71237___");
 }
 
-function instanceOfPromise(object) {
-    return instanceOfPromiseJS(object) || instanceOfPromiseItem(object)
+function instanceOfQPromise(object) {
+    return instanceOfQPromiseJS(object) || instanceOfQPromiseItem(object)
 }
 
 function _instanceOfSignal(object) {
@@ -148,7 +148,7 @@ QPromise.prototype.resolve = function(value) {
     }
 
     if (this === value) { // 2.3.1
-        this.reject(new TypeError("Promise.resolve(value) : The value can not be same as the promise object."));
+        this.reject(new TypeError("QPromise.resolve(value) : The value can not be same as the promise object."));
         return;
     }
 
@@ -163,12 +163,12 @@ QPromise.prototype.resolve = function(value) {
             value = newPromise;
         } catch (e) {
             console.error(e);
-            throw new Error("promise.resolve(object): Failed to call object.connect(). Are you passing the result of Qt.binding()? Please use QML Promise and pass it to resolveWhen property.");
+            throw new Error("promise.resolve(object): Failed to call object.connect(). Are you passing the result of Qt.binding()? Please use QML QPromise and pass it to resolveWhen property.");
         }
     }
 
     if (value &&
-        instanceOfPromise(value)) {
+        instanceOfQPromise(value)) {
 
         if (value.state === "pending") {
             value.then(function(x) {
@@ -358,25 +358,25 @@ function Combinator(promises,allSettled) {
 }
 
 Combinator.prototype.add = function(promises) {
-    if (instanceOfPromise(promises)) {
-        this._addPromise(promises);
+    if (instanceOfQPromise(promises)) {
+        this._addQPromise(promises);
     } else {
-        this._addPromises(promises);
+        this._addQPromises(promises);
     }
     return this.combined;
 }
 
-Combinator.prototype._addPromises = function(promises) {
+Combinator.prototype._addQPromises = function(promises) {
     for (var i = 0 ; i < promises.length;i++) {
-        this._addPromise(promises[i]);
+        this._addQPromise(promises[i]);
     }
 }
 
-Combinator.prototype._addPromise = function(promise) {
+Combinator.prototype._addQPromise = function(promise) {
     if (_instanceOfSignal(promise)) {
         var delegate = new QPromise();
         delegate.resolve(promise);
-        this._addCheckedPromise(delegate);
+        this._addCheckedQPromise(delegate);
     } else if (promise.isSettled) {
         if (promise.isRejected) {
             this._reject(promise._result);
@@ -384,11 +384,11 @@ Combinator.prototype._addPromise = function(promise) {
         // calling `resolve` after adding resolved promises is covered
         // by the call to `_settle` in constructor
     } else {
-        this._addCheckedPromise(promise);
+        this._addCheckedQPromise(promise);
     }
 }
 
-Combinator.prototype._addCheckedPromise = function(promise) {
+Combinator.prototype._addCheckedQPromise = function(promise) {
     var combinator = this;
 
     var promiseIndex = this._promises.length;
